@@ -1,0 +1,17 @@
+body {
+  background: #0b0b0b;
+  color: #eaeaea;
+  font-family: monospace;
+  text-align: center;
+  height: 200vh; /* 스크롤 유도 */
+}
+
+.error-box {
+  margin-top: 20vh;
+  transition: all 0.3s ease;
+}
+
+.chaos * {
+  position: absolute;
+  transition: transform 0.2s;
+}
