@@ -5,48 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>502 Bad Gateway - Student Not Found</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-    <style>
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 200%; /* 스크롤 유도를 위해 높게 설정 */
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, "Helvetica Neue", Arial, sans-serif;
-            background-color: #fff;
-            color: #313131;
-            overflow-x: hidden;
-        }
-
-        /* Cloudflare 스타일 레이아웃 */
-        .error-container {
-            padding: 50px 100px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .header { border-bottom: 1px solid #ddd; padding-bottom: 20px; margin-bottom: 40px; }
-        .error-code { font-size: 48px; font-weight: 300; }
-        .status-grid { display: flex; gap: 40px; margin-top: 30px; }
-        .status-item { text-align: center; }
-        .status-icon { font-size: 50px; margin-bottom: 10px; }
-        .status-text { font-weight: bold; }
-        .status-ok { color: #2ecc71; }
-        .status-fail { color: #e74c3c; }
-
-        h1 { font-size: 36px; margin: 20px 0; }
-        p { line-height: 1.6; font-size: 18px; }
-
-        /* 캔버스는 배경으로 설정 */
-        #physics-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        .explodable {
-            display: inline-block;
-            position: relative;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -55,7 +14,7 @@
 <div class="error-container" id="main-content">
     <div class="header explodable">
         <span class="error-code">Error 502</span>
-        <span style="color: #888; margin-left: 20px;">Ray ID: 777-MIDTERM-HELL &bull; 2026-04-27</span>
+        <span class="ray-id">Ray ID: 777-MIDTERM-HELL &bull; 2026-04-27</span>
     </div>
 
     <h1 class="explodable">What happened to this man?</h1>
@@ -79,96 +38,12 @@
         </div>
     </div>
 
-    <div style="margin-top: 100px;" class="explodable">
+    <div class="footer-note explodable">
         <p><strong>Cause:</strong> Excessive study hours and caffeine overdose.</p>
         <p><strong>Action:</strong> Please try again after the vacation or provide a "Pass" grade.</p>
     </div>
 </div>
 
-<script>
-    const { Engine, Render, Runner, Bodies, Composite, World } = Matter;
-
-    let exploded = false;
-    const canvas = document.getElementById('physics-canvas');
-    const content = document.getElementById('main-content');
-    const elements = document.querySelectorAll('.explodable');
-
-    window.addEventListener('scroll', () => {
-        if (!exploded && window.scrollY > 10) {
-            explode();
-        }
-    });
-
-    function explode() {
-        exploded = true;
-        
-        // 캔버스 크기 설정
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const engine = Engine.create();
-        const render = Render.create({
-            canvas: canvas,
-            engine: engine,
-            options: {
-                width: window.innerWidth,
-                height: window.innerHeight,
-                wireframes: false,
-                background: 'transparent'
-            }
-        });
-
-        // 물리 세계에 요소 추가
-        elements.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            
-            // HTML 요소를 숨기고 물리 객체로 대체
-            const body = Bodies.rectangle(
-                rect.left + rect.width / 2,
-                rect.top + rect.height / 2,
-                rect.width,
-                rect.height,
-                {
-                    render: {
-                        sprite: {
-                            texture: elementToImage(el),
-                        }
-                    }
-                }
-            );
-
-            // 사방으로 튕겨 나가는 힘 추가
-            Matter.Body.applyForce(body, body.position, {
-                x: (Math.random() - 0.5) * 0.2,
-                y: (Math.random() - 0.5) * 0.2
-            });
-
-            Composite.add(engine.world, body);
-            el.style.visibility = 'hidden';
-        });
-
-        // 바닥 추가 (나중에 쌓이게 하고 싶으면 사용)
-        // Composite.add(engine.world, Bodies.rectangle(window.innerWidth/2, window.innerHeight, window.innerWidth, 60, { isStatic: true }));
-
-        Render.run(render);
-        const runner = Runner.create();
-        Runner.run(runner, engine);
-    }
-
-    // 요소를 캔버스 이미지로 변환하는 간단한 트릭
-    function elementToImage(el) {
-        const svg = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="${el.offsetWidth}" height="${el.offsetHeight}">
-                <foreignObject width="100%" height="100%">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: sans-serif; font-size: 16px; color: #313131;">
-                        ${el.innerHTML}
-                    </div>
-                </foreignObject>
-            </svg>
-        `;
-        return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-    }
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
