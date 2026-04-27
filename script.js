@@ -1,23 +1,25 @@
-const { Engine, Render, Runner, Bodies, Composite, Matter } = window.Matter;
+const { Engine, Render, Runner, Bodies, Composite, Body, Events } = Matter;
 
 let exploded = false;
 const canvas = document.getElementById('physics-canvas');
 const elements = document.querySelectorAll('.explodable');
 
-// 스크롤 감지 시 폭발 트리거
 window.addEventListener('scroll', () => {
-    if (!exploded && window.scrollY > 20) {
-        explode();
+    if (!exploded && window.scrollY > 15) {
+        startMadness();
     }
 });
 
-function explode() {
+function startMadness() {
     exploded = true;
+    document.body.classList.add('madness');
     
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
     const engine = Engine.create();
+    engine.gravity.y = 0; // 중력 제거 (둥둥 떠다님)
+
     const render = Render.create({
         canvas: canvas,
         engine: engine,
@@ -29,32 +31,48 @@ function explode() {
         }
     });
 
-    elements.forEach(el => {
+    // 화면 경계 벽 생성 (통통 튕기게 함)
+    const wallOptions = { isStatic: true, restitution: 1, friction: 0 };
+    Composite.add(engine.world, [
+        Bodies.rectangle(window.innerWidth / 2, -25, window.innerWidth, 50, wallOptions), // 천장
+        Bodies.rectangle(window.innerWidth / 2, window.innerHeight + 25, window.innerWidth, 50, wallOptions), // 바닥
+        Bodies.rectangle(-25, window.innerHeight / 2, 50, window.innerHeight, wallOptions), // 왼쪽 벽
+        Bodies.rectangle(window.innerWidth + 25, window.innerHeight / 2, 50, window.innerHeight, wallOptions) // 오른쪽 벽
+    ]);
+
+    elements.forEach((el, index) => {
         const rect = el.getBoundingClientRect();
         
-        // 요소를 이미지화하여 물리 객체 생성
+        // 무지개 효과 추가
+        el.classList.add('rainbow');
+
         const body = Bodies.rectangle(
             rect.left + rect.width / 2,
             rect.top + rect.height / 2,
             rect.width,
             rect.height,
             {
+                restitution: 1.05, // 부딪힐 때마다 에너지가 5%씩 증가 (점점 빨라짐)
+                friction: 0,
+                frictionAir: 0,
                 render: {
                     sprite: {
                         texture: elementToImage(el),
                     }
-                },
-                frictionAir: 0.02,
-                restitution: 0.6
+                }
             }
         );
 
-        // 무작위 방향으로 튕겨내는 힘(Impulse) 적용
-        const forceMagnitude = 0.05 * body.mass;
-        window.Matter.Body.applyForce(body, body.position, {
-            x: (Math.random() - 0.5) * forceMagnitude,
-            y: (Math.random() - 0.8) * forceMagnitude // 위쪽으로 더 많이 튀게 설정
+        // 초기 무작위 발사
+        const speed = 10;
+        const angle = Math.random() * Math.PI * 2;
+        Body.setVelocity(body, {
+            x: Math.cos(angle) * speed,
+            y: Math.sin(angle) * speed
         });
+
+        // 회전 추가
+        Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.5);
 
         Composite.add(engine.world, body);
         el.style.visibility = 'hidden';
@@ -63,20 +81,30 @@ function explode() {
     Render.run(render);
     const runner = Runner.create();
     Runner.run(runner, engine);
+
+    // 색상이 계속 변하는 효과를 위한 루프
+    Events.on(engine, 'afterUpdate', () => {
+        // 시간이 지날수록 점점 미쳐가는 속도 제한 (너무 빠르면 화면 뚫고 나감)
+        engine.world.bodies.forEach(body => {
+            if (body.speed > 25) {
+                Body.setVelocity(body, { 
+                    x: body.velocity.x * 0.99, 
+                    y: body.velocity.y * 0.99 
+                });
+            }
+        });
+    });
 }
 
-/**
- * HTML 요소를 SVG 이미지로 변환하여 Canvas에서 텍스처로 사용 가능하게 함
- */
 function elementToImage(el) {
     const width = el.offsetWidth;
     const height = el.offsetHeight;
     
-    // 스타일을 인라인으로 복사 (폰트 및 색상 유지)
+    // 무지개 네온 효과를 이미지에 입힘
     const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
             <foreignObject width="100%" height="100%">
-                <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: sans-serif; font-size: 16px; color: #313131; background: transparent;">
+                <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: sans-serif; font-weight: bold; color: #fff; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; padding: 5px;">
                     ${el.innerHTML}
                 </div>
             </foreignObject>
