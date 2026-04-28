@@ -8,7 +8,7 @@ body, html {
     transition: background-color 0.3s;
 }
 
-/* 폭발 후 배경색 변화 */
+/* 배경색 변화 */
 body.madness {
     background-color: #000 !important;
     overflow: hidden;
@@ -41,7 +41,7 @@ body.madness {
     transition: filter 0.2s;
 }
 
-/* 무지개 광란 애니메이션 */
+/* 무지개 애니메이션 */
 @keyframes rainbow-glow {
     0% { filter: drop-shadow(0 0 10px red) hue-rotate(0deg); }
     100% { filter: drop-shadow(0 0 10px red) hue-rotate(360deg); }
