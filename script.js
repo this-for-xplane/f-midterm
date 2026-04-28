@@ -18,7 +18,7 @@ function startMadness() {
     canvas.height = window.innerHeight;
 
     const engine = Engine.create();
-    engine.gravity.y = 0; // 중력 제거 (둥둥 떠다님)
+    engine.gravity.y = 0;
 
     const render = Render.create({
         canvas: canvas,
@@ -31,7 +31,7 @@ function startMadness() {
         }
     });
 
-    // 화면 경계 벽 생성 (통통 튕기게 함)
+    // 화면 경계 벽
     const wallOptions = { isStatic: true, restitution: 1, friction: 0 };
     Composite.add(engine.world, [
         Bodies.rectangle(window.innerWidth / 2, -25, window.innerWidth, 50, wallOptions), // 천장
@@ -43,7 +43,7 @@ function startMadness() {
     elements.forEach((el, index) => {
         const rect = el.getBoundingClientRect();
         
-        // 무지개 효과 추가
+        // 무지개 효과..?
         el.classList.add('rainbow');
 
         const body = Bodies.rectangle(
@@ -52,7 +52,7 @@ function startMadness() {
             rect.width,
             rect.height,
             {
-                restitution: 1.05, // 부딪힐 때마다 에너지가 5%씩 증가 (점점 빨라짐)
+                restitution: 1.05, // 부딪힐 때마다 에너지가 5%씩
                 friction: 0,
                 frictionAir: 0,
                 render: {
@@ -100,7 +100,6 @@ function elementToImage(el) {
     const width = el.offsetWidth;
     const height = el.offsetHeight;
     
-    // 무지개 네온 효과를 이미지에 입힘
     const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
             <foreignObject width="100%" height="100%">
